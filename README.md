@@ -21,7 +21,9 @@ O projeto é acadêmico. Os relatos não são encaminhados automaticamente a con
 - PostgreSQL como banco principal; H2 somente nos testes e no perfil de demonstração `local`.
 - Migrações Flyway, suíte JUnit/Mockito/MockMvc, Docker/Compose, CI e preparação de CD com aprovação manual para Azure.
 
-Consulte [o relatório de validação](docs/relatorio-validacao.md) para os comandos, os resultados efetivos e as pendências. Arquivos de integração e pipelines não comprovam publicação em produção.
+**Status verificado em 16/11/2026:** aplicação/API/interface e persistência exercitadas; **102 testes aprovados**, **CI GitHub concluído** e **build Docker completo com upload da imagem aprovado** no [run 43799275054](https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43799275054), commit `142e5fe`. Execução em Docker Compose também verificada. Permanecem para validação externa a chamada Gemini com chave real, Azure/Blob reais e a promoção pelo CD com aprovação manual; não há implantação de produção comprovada.
+
+Consulte [o relatório de validação](docs/relatorio-validacao.md) e a [evidência do CI](docs/evidencias/github-ci.json) para comandos, resultados e limites. A execução bem-sucedida do CI prepara a imagem; a implantação depende de uma etapa de CD autorizada e verificada.
 
 ## Tecnologias e arquitetura
 
@@ -215,6 +217,8 @@ Erros têm JSON com `timestamp`, `status`, `message` e `path`; erros de validaç
 
 ## Inteligência artificial textual
 
+**A aplicação funciona sem chave Gemini.** Deixe `GEMINI_API_KEY` vazia para usar a classificação automática por regras locais, identificada como `REGRAS` na API e na interface. Nesse modo o backend não chama a API Google e não há consumo da Gemini. Somente para usar ou validar o Gemini real é necessário gerar uma chave e configurá-la como segredo, nunca no chat, no frontend ou no Git.
+
 Defina `GEMINI_API_KEY` de forma segura antes de iniciar. O backend chama `https://generativelanguage.googleapis.com/v1beta/models/<modelo>:generateContent` com a chave no header; ela não vai para URLs, frontend ou Git. O envio contém somente a descrição, separada das instruções de sistema, e solicita JSON estruturado com:
 
 ```json
@@ -245,7 +249,7 @@ Use branches curtas, pull requests, revisão por colega e CI obrigatório na `ma
 
 ## CI/CD e Cloud
 
-O CI compila/testa com Java 17 e PostgreSQL efêmero, constrói uma imagem Docker e guarda o artefato por SHA. O CD é iniciado manualmente, exige uma execução CI válida de `main` e aprovação do environment `production`, usa OIDC e promove a imagem por digest ao Azure Container Apps. Configure reviewers e o repository secret `ENVIRONMENT_READ_TOKEN` com `Administration:read` para verificar a proteção do environment; o token padrão do workflow não oferece essa permissão. Veja [docs/cloud.md](docs/cloud.md).
+O CI compila/testa com Java 17 e PostgreSQL efêmero, constrói uma imagem Docker e guarda o artefato por SHA. Esses passos foram executados com sucesso no [run 43799275054](https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43799275054), incluindo o build Maven completo dentro do Docker; a limitação de disco do ambiente local deixou de ser uma pendência de validação do build. O CD é iniciado manualmente, exige uma execução CI válida de `main` e aprovação do environment `production`, usa OIDC e promove a imagem por digest ao Azure Container Apps. Configure reviewers e o repository secret `ENVIRONMENT_READ_TOKEN` com `Administration:read` para verificar a proteção do environment; o token padrão do workflow não oferece essa permissão. Veja [docs/cloud.md](docs/cloud.md).
 
 A arquitetura preparada utiliza Container Apps, Azure Database for PostgreSQL, Blob privado, Key Vault e Monitor/Log Analytics. O adaptador Blob e sessões JDBC permitem compartilhar estado entre réplicas; disponibilidade, backups, restauração, limites de escala e testes de carga dependem da configuração e validação no Azure. Esta entrega não deve ser descrita como publicada em produção sem deploy verificado.
 

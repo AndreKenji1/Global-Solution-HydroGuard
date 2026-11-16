@@ -1,6 +1,6 @@
 # Operação no Azure e entrega contínua
 
-Esta documentação prepara a implantação. A presença dos arquivos de CI/CD não comprova execução no GitHub Actions nem publicação no Azure. Confira `docs/relatorio-validacao.md` para os resultados efetivamente obtidos nesta entrega.
+Atualizado em **16/11/2026**. O [CI run 43799275054](https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43799275054), commit `142e5fe`, concluiu com sucesso os 102 testes e o build/upload da imagem Docker. Esta documentação prepara a implantação Azure; a execução do CI não comprova promoção pelo CD nem publicação. Confira o [relatório](relatorio-validacao.md) e a [evidência do CI](evidencias/github-ci.json).
 
 ## Componentes e comunicação
 
@@ -57,6 +57,8 @@ Colete logs estruturados no stdout, métricas de latência/erros HTTP, pool/cone
 2. Inicia PostgreSQL efêmero e executa `mvn --batch-mode --no-transfer-progress -Ppostgres-it clean verify`, incluindo testes unitários/API H2 e testes de integração PostgreSQL pelo Failsafe.
 3. Arquiva relatórios Surefire/Failsafe.
 4. Constrói a imagem Docker da mesma revisão e salva `hydroguard-image-<sha>` como artifact por 14 dias. O Dockerfile também executa a suíte sem dependências externas. Nenhuma imagem é publicada automaticamente pelo CI.
+
+A execução real validada gerou o artifact de imagem `14196076398` e o artifact de relatórios `14195432553`; os links e o SHA completo estão em [evidencias/github-ci.json](evidencias/github-ci.json). O build Docker padrão foi aprovado no runner GitHub, superando o bloqueio de armazenamento ocorrido no daemon local. Isso não comprova acesso ao ACR ou deploy Azure.
 
 Proteja `main` com pull request, revisão por colega e o job `backend`/`image` obrigatório. Recomenda-se manter o repositório privado durante o desenvolvimento acadêmico. Não inclua `.env`, banco, fotografias ou relatórios com dados reais nos commits.
 

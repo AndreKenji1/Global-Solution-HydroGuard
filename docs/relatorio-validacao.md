@@ -61,18 +61,19 @@ O PostgreSQL e a aplicação foram executados com Docker Compose, reutilizando o
 
 O `Dockerfile` entregue tem o build Maven padrão e a opção `JAR_SOURCE=prebuilt`, que empacota o JAR já verificado. O modo prebuilt gerou a imagem `sha256:e7d4da495aa8b867d03a0a89bb3b0bd1f792b9489d3cbea452a5cc50e0c9b60c`, e essa imagem está executando no Compose. **Entretanto, o comando de build terminou com código 102:** o BuildKit falhou ao gravar um descritor temporário em `content/ingest`, com `ENOSPC`, depois de exportar e registrar a imagem. Repetir sem sandbox apresentou o mesmo erro. Não se registra esse comando como um build Docker aprovado.
 
-A tentativa do modo Maven completo no Docker também esbarrou no limite de disco de 8 GB e no driver `vfs`, que duplica camadas durante a extração do JDK. O build Maven no host e a execução da imagem foram comprovados, mas **a conclusão com código zero do build Docker e a construção Maven integral dentro do contêiner permanecem pendentes de um daemon com armazenamento suficiente**. Nenhum daemon foi reiniciado, banco foi apagado ou volume existente foi descartado.
+A tentativa do modo Maven completo no Docker também esbarrou no limite de disco de 8 GB e no driver `vfs`, que duplica camadas durante a extração do JDK. Essa limitação ficou restrita ao ambiente local: **o build Docker integral, incluindo a compilação Maven e a suíte de testes dentro da imagem, foi posteriormente concluído com sucesso no GitHub Actions**. Nenhum daemon foi reiniciado, banco foi apagado ou volume existente foi descartado.
 
 Workflows validados com **actionlint**, parser YAML e `bash -n`; `docker compose config --quiet` também passou. O CI declara build/testes H2/PostgreSQL e preparação de imagem por SHA. O CD manual promove o artefato do CI por digest, usa Azure OIDC e depende de aprovadores no environment `production`, com proibição de autoaprovação. A validação dessa proteção exige o secret `ENVIRONMENT_READ_TOKEN` com leitura de Administration; o workflow falha fechado quando não configurado.
 
-Os workflows não foram executados no GitHub nesta sessão e os recursos Azure não foram provisionados. A validação sintática não equivale a uma execução do pipeline.
+O [CI run 43799275054](https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43799275054), no commit `142e5fe3a0cce80be1f9ef03943ca20f4c32b0fe`, terminou com **success**. Os jobs `backend` e `image` passaram, incluindo testes H2/PostgreSQL, build Docker integral e publicação dos artefatos de imagem e relatórios no GitHub Actions. A evidência sanitizada está em [evidencias/github-ci.json](evidencias/github-ci.json). A imagem tem artifact ID `14196076398` e os relatórios, `14195432553`.
+
+A promoção pelo CD e os recursos Azure ainda não foram executados/validados nesta entrega; CI aprovado não significa aplicação publicada em produção.
 
 ## Pendências e limites efetivos
 
-- **Build Docker:** repetir o build integral em um ambiente com espaço e driver adequados; nesta sessão o BuildKit exportou a imagem, mas falhou na conclusão por `ENOSPC`. A execução da imagem/Compose foi verificada.
-- **Gemini real:** nenhuma `GEMINI_API_KEY` estava configurada. O cliente real está implementado, mas somente mocks e fallback foram exercitados; falta validar uma chamada ao Google com chave válida e modelo disponível na conta.
+- **Gemini real (opcional):** nenhuma `GEMINI_API_KEY` estava configurada. O sistema funciona sem ela com classificação explícita `REGRAS`, já validada. Apenas a ativação e a validação da API real do Google exigem uma chave válida e modelo disponível na conta; mocks e fallback não equivalem a uma chamada real.
 - **Azure real:** não houve deploy, criação de recursos ou teste com conta Blob real. Container Apps, PostgreSQL gerenciado, Blob privado, Key Vault, monitoramento, backups, alta disponibilidade e escala estão documentados; o adaptador Blob foi testado por mocks.
-- **Configuração no GitHub:** cadastrar variáveis/segredos/OIDC, configurar revisores e permissões do environment, proteger a branch e executar os workflows em um repositório privado.
+- **CD e configurações administrativas:** cadastrar variáveis/segredos/OIDC e configurar revisores, permissões do environment e proteção de branch antes de executar o CD. O CI já foi executado com sucesso. A publicação no repositório público foi expressamente autorizada pelo usuário.
 - **Operação com cidadãos reais:** definir controlador/base legal, retenção e direitos de titulares, moderação de conteúdo e medidas contra abuso distribuído. Texto livre ou a justificativa da IA ainda podem conter informações fornecidas indevidamente pelo usuário; remoção de EXIF não anonimiza o conteúdo visual de uma imagem.
 - **Instalações anteriores:** a entrega inicia schemas novos; um banco legado com dados exige backup e migração explícita validada em cópia. Não houve banco legado com dados fornecido no ZIP.
 

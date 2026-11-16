@@ -1,0 +1,61 @@
+{
+  "recorded_client_date": "2026-11-16",
+  "repository": "AndreKenji1/Global-Solution-HydroGuard",
+  "workflow_path": ".github/workflows/ci.yml",
+  "run": {
+    "id": 43799275054,
+    "html_url": "https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43799275054",
+    "head_sha": "142e5fe3a0cce80be1f9ef03943ca20f4c32b0fe",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "jobs": [
+    {
+      "name": "backend",
+      "conclusion": "success",
+      "validation": "Maven clean verify, H2/mocks e integração PostgreSQL",
+      "tests": {
+        "unit_and_api": 100,
+        "postgresql_integration": 2,
+        "total": 102,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "name": "image",
+      "conclusion": "success",
+      "validation": "Build Docker multi-stage padrão com compilação/testes Maven dentro da imagem e upload do artefato por SHA"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 14196076398,
+      "name": "hydroguard-image-142e5fe3a0cce80be1f9ef03943ca20f4c32b0fe",
+      "html_url": "https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43799275054/artifacts/14196076398",
+      "purpose": "Imagem Docker produzida pelo CI e disponível para promoção manual"
+    },
+    {
+      "id": 14195432553,
+      "name": "test-reports-142e5fe3a0cce80be1f9ef03943ca20f4c32b0fe",
+      "html_url": "https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43799275054/artifacts/14195432553",
+      "purpose": "Relatórios Surefire/Failsafe"
+    }
+  ],
+  "evidence_scope": {
+    "confirmed": [
+      "build Maven e 102 testes no CI",
+      "build Docker completo no CI",
+      "upload dos artefatos de teste e imagem"
+    ],
+    "not_confirmed": [
+      "deploy ou execução no Azure",
+      "execução do workflow CD e aprovação production",
+      "chamada Gemini com chave real",
+      "acesso a Azure Blob real"
+    ],
+    "local_history": "Tentativas anteriores no daemon local vfs/8GB apresentaram ENOSPC e código102; esse histórico não invalida o build completo aprovado no runner GitHub."
+  },
+  "source_note": "Resultado GitHub Actions verificado nesta sessão pelo agente principal; somente metadados não sensíveis foram registrados."
+}
