@@ -8,6 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
+import org.slf4j.LoggerFactory;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 import java.io.ByteArrayOutputStream;
 import java.net.http.HttpClient;
@@ -139,6 +144,33 @@ class GeminiIntegrationTest {
         resposta(status, "corpo externo não deve ser exposto ao usuário");
         assertContingencia(service.classificar("Cano rompido na rua"));
         verify(client, times(1)).send(any(HttpRequest.class), org.mockito.ArgumentMatchers.<HttpResponse.BodyHandler<String>>any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {401, 429})
+    void registraSomenteStatusHttpSemSegredoCorpoOuRelato(int status) throws Exception {
+        String corpoPrivado = "corpo-externo-sensivel-nao-registrar";
+        String relatoPrivado = "Cano rompido na rua; relato-privado-nao-registrar";
+        resposta(status, corpoPrivado);
+        Logger logger = (Logger) LoggerFactory.getLogger(TriagemService.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            assertContingencia(service.classificar(relatoPrivado));
+            assertTrue(appender.list.stream().anyMatch(event -> event.getLevel() == Level.WARN
+                && event.getFormattedMessage().equals("Gemini HTTP " + status)));
+            String log = String.join("\n", appender.list.stream().map(ILoggingEvent::getFormattedMessage).toList());
+            assertFalse(log.contains("chave-ficticia-de-teste"));
+            assertFalse(log.contains("x-goog-api-key"));
+            assertFalse(log.contains(corpoPrivado));
+            assertFalse(log.contains(relatoPrivado));
+            assertTrue(appender.list.stream().allMatch(event -> event.getThrowableProxy() == null));
+            verify(response, never()).body();
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
     }
 
     @Test

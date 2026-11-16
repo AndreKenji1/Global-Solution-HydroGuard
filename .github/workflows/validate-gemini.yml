@@ -68,6 +68,7 @@ jobs:
           # A chave permanece somente no backend; o cliente HTTP usa apenas sessão/CSRF.
           env -u GEMINI_API_KEY python "$GITHUB_WORKSPACE/tools/validar-gemini-real.py" \
             --base-url http://127.0.0.1:8091 \
+            --backend-log "$work_dir/application.log" \
             --output "$work_dir/result.json"
       - name: Resumir evidência sem dados sensíveis
         if: always()

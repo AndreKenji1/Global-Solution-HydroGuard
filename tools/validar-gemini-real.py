@@ -6,6 +6,7 @@ import http.cookiejar
 import json
 import os
 from pathlib import Path
+import re
 import time
 import urllib.error
 import urllib.parse
@@ -15,6 +16,36 @@ import uuid
 
 class ValidationFailure(Exception):
     pass
+
+
+def backend_diagnostics(path):
+    """Extrai só códigos/classes fixos; nenhum conteúdo bruto do log é devolvido."""
+    if not path or not path.is_file():
+        return {}
+    statuses = []
+    failures = []
+    allowed = {"IllegalArgumentException", "IllegalStateException", "JsonParseException",
+               "JsonMappingException", "HttpTimeoutException", "HttpConnectTimeoutException",
+               "ConnectException", "SSLHandshakeException"}
+    try:
+        with path.open(encoding="utf-8", errors="replace") as stream:
+            for index, line in enumerate(stream):
+                if index >= 10000:
+                    break
+                match = re.search(r"Gemini HTTP ([1-5][0-9]{2})(?:\s|$)", line)
+                if match:
+                    statuses.append(int(match.group(1)))
+                match = re.search(r"Gemini indisponível: ([A-Za-z]+); usando regras locais", line)
+                if match and match.group(1) in allowed:
+                    failures.append(match.group(1))
+    except OSError:
+        return {}
+    result = {}
+    if statuses:
+        result["providerHttpStatus"] = statuses[-1]
+    if failures:
+        result["backendFailureClass"] = failures[-1]
+    return result
 
 
 def request_json(client, url, label, method="GET", payload=None, headers=None, expected=200):
@@ -127,6 +158,7 @@ def main(argv=None):
     parser.add_argument("--base-url", default="http://127.0.0.1:8091")
     parser.add_argument("--wait-seconds", type=int, default=60)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--backend-log", type=Path, help="Extrair somente código HTTP e classe permitida em caso de falha")
     args = parser.parse_args(argv)
     try:
         if not 0 <= args.wait_seconds <= 120:
@@ -135,6 +167,7 @@ def main(argv=None):
         code = 0
     except ValidationFailure as error:
         result = {"result": "FAIL", "realGeminiConfirmed": False, "message": str(error)}
+        result.update(backend_diagnostics(args.backend_log))
         code = 1
     result["checkedAtUtc"] = datetime.now(timezone.utc).isoformat()
     text = json.dumps(result, ensure_ascii=False, indent=2) + "\n"

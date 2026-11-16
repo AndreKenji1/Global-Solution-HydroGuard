@@ -122,7 +122,11 @@ public class TriagemService {
             .POST(HttpRequest.BodyPublishers.ofByteArray(payload))
             .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) throw new IllegalStateException("Gemini HTTP " + response.statusCode());
+        if (response.statusCode() != 200) {
+            // Status numérico é diagnóstico suficiente; corpo/cabeçalhos podem conter segredos ou dados do relato.
+            LOG.warn("Gemini HTTP {}", response.statusCode());
+            throw new IllegalStateException("Gemini HTTP " + response.statusCode());
+        }
         if (response.body() == null || response.body().length() > 65536)
             throw new IllegalArgumentException("Resposta da IA fora dos limites");
         JsonNode root = json.readTree(response.body());

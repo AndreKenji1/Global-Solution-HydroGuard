@@ -18,7 +18,7 @@ A compilação e os testes são executados sem a chave. Depois, somente o backen
 
 A aprovação exige saúde do backend, CSRF válido, HTTP 201 no cadastro, `IA_GEMINI`, prioridade/categoria/justificativa válidas e consulta HTTP 200 com a mesma classificação persistida, sem campos privados. A categoria e a justificativa não precisam ter um texto predeterminado.
 
-O artefato `gemini-real-result-<id da execução>` contém apenas um resultado sanitizado: confirmação, prioridade, tamanhos de texto e verificações. Chave, cookies, token de upload, protocolo, respostas completas e logs brutos da aplicação não são publicados.
+O artefato `gemini-real-result-<id da execução>` contém apenas um resultado sanitizado: confirmação, prioridade, tamanhos de texto e verificações. Em falha, pode incluir somente o código HTTP da API externa e uma classe de erro permitida, extraídos do log interno. Chave, cookies, token de upload, protocolo, respostas completas e logs brutos da aplicação não são publicados.
 
 ## Executar localmente
 

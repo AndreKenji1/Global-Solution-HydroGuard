@@ -108,6 +108,16 @@ class ValidationTest(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("HTTP 429", result["message"])
 
+    def test_backend_diagnostics_only_returns_status_and_allowed_class(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "application.log"
+            path.write_text("MUST-NOT-LEAK\nGemini HTTP 429\n"
+                            "Gemini indisponível: IllegalStateException; usando regras locais\n"
+                            "Gemini indisponível: MUSTNOTLEAK; usando regras locais\n", encoding="utf-8")
+            diagnostics = smoke.backend_diagnostics(path)
+            self.assertEqual(diagnostics, {"providerHttpStatus": 429, "backendFailureClass": "IllegalStateException"})
+            self.assertNotIn("MUST", json.dumps(diagnostics))
+
 
 if __name__ == "__main__":
     unittest.main()
