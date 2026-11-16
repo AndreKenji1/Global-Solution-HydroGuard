@@ -21,9 +21,9 @@ O projeto é acadêmico. Os relatos não são encaminhados automaticamente a con
 - PostgreSQL como banco principal; H2 somente nos testes e no perfil de demonstração `local`.
 - Migrações Flyway, suíte JUnit/Mockito/MockMvc, Docker/Compose, CI e preparação de CD com aprovação manual para Azure.
 
-**Status verificado em 16/11/2026:** aplicação/API/interface e persistência exercitadas; **102 testes aprovados**, **CI GitHub concluído** e **build Docker completo com upload da imagem aprovado** no [run 43799275054](https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43799275054), commit `142e5fe`. Execução em Docker Compose também verificada. Permanecem para validação externa a chamada Gemini com chave real, Azure/Blob reais e a promoção pelo CD com aprovação manual; não há implantação de produção comprovada.
+**Status verificado em 16/11/2026:** aplicação/API/interface, persistência e execução Docker Compose exercitadas; **CI e build Docker aprovados**. O [CI mais recente verificado](https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43973200786), commit `32a8b46`, aprovou **104 testes Java e seis testes Python**. A [validação Gemini real](https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43973795166) também passou pelo backend, com `IA_GEMINI` e consulta da classificação persistida, usando `gemini-flash-lite-latest` e timeout de 20 segundos. Azure/Blob reais e a promoção pelo CD continuam sem validação; não há implantação de produção comprovada.
 
-Consulte [o relatório de validação](docs/relatorio-validacao.md) e a [evidência do CI](docs/evidencias/github-ci.json) para comandos, resultados e limites. A execução bem-sucedida do CI prepara a imagem; a implantação depende de uma etapa de CD autorizada e verificada.
+Consulte [o relatório de validação](docs/relatorio-validacao.md), a [evidência inicial do CI](docs/evidencias/github-ci.json) e a [evidência Gemini real](docs/evidencias/gemini-real.json) para comandos, resultados e limites. A execução bem-sucedida do CI prepara a imagem; a implantação depende de uma etapa de CD autorizada e verificada.
 
 ## Tecnologias e arquitetura
 
@@ -164,8 +164,8 @@ Essa opção exige JDK/Maven no host e o JAR gerado em `target/`; a compilação
 | `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH` | Conta `ADMIN`; hash vazio desabilita a conta |
 | `ANALYST_USERNAME`, `ANALYST_PASSWORD_HASH` | Conta `ANALISTA`, somente leitura administrativa |
 | `GEMINI_API_KEY` | Segredo opcional, exclusivo do backend |
-| `GEMINI_MODEL` | Modelo; padrão `gemini-2.5-flash` |
-| `GEMINI_TIMEOUT_SECONDS` | Timeout por chamada; padrão `8`, permitido até `30` |
+| `GEMINI_MODEL` | Modelo; padrão `gemini-flash-lite-latest`, validado na conta em 16/11/2026 |
+| `GEMINI_TIMEOUT_SECONDS` | Timeout por chamada; padrão `20`, permitido até `30` |
 | `STORAGE_PROVIDER` | `local` ou `azure`; padrão `local` |
 | `UPLOAD_DIR` | Diretório local privado; padrão `./uploads` |
 | `AZURE_STORAGE_BLOB_ENDPOINT` | Endpoint HTTPS da conta Blob |
@@ -235,6 +235,10 @@ A classificação é uma sugestão, não um laudo ou confirmação de urgência.
 
 Para validar com uma chave guardada no GitHub, siga [o procedimento Gemini real](docs/gemini-validacao.md). O workflow manual inicia um backend isolado, envia um relato sintético e só aprova com `IA_GEMINI` persistida. O CI comum continua sem utilizar a chave real.
 
+Em 16/11/2026, o modelo `gemini-flash-lite-latest` passou nesse fluxo real com timeout de 20 segundos: cadastro HTTP 201, resposta estruturada validada e consulta HTTP 200 preservando a classificação. O teste usou H2 temporário no perfil `local`; a integração PostgreSQL foi verificada separadamente pelo CI. `gemini-2.5-flash` retornou HTTP 404 e `gemini-flash-latest` excedeu 20 segundos nessa conta; essas tentativas ficaram registradas como falhas, com fallback explícito.
+
+O sufixo `latest` é um alias que o fornecedor pode atualizar. Consulte o catálogo da conta e repita a validação se mudar o modelo ou se o alias deixar de estar disponível. Salvar `GEMINI_API_KEY` nos segredos do GitHub habilita o workflow de validação; isso não preenche automaticamente o ambiente local, o Compose ou o Container App. Para usar IA nesses ambientes, configure o segredo também no processo do backend correspondente. Sem ele, o comportamento continua sendo `REGRAS`.
+
 ## Testes e colaboração Git
 
 ```bash
@@ -247,7 +251,7 @@ Os testes normais usam H2 em memória e Gemini mockada, sem chave real. A suíte
 
 Os cenários [Gherkin](docs/cenarios-bdd.feature) descrevem o comportamento esperado; o arquivo `.feature` é documentação e não uma suíte Cucumber executável. Veja no relatório quais testes passaram e quais verificações manuais foram concluídas.
 
-Use branches curtas, pull requests, revisão por colega e CI obrigatório na `main`. Mantenha o repositório privado durante o desenvolvimento acadêmico. `.env`, banco, fotos, cookies, logs e arquivos privados do HTTP Client não devem ser versionados.
+Use branches curtas, pull requests, revisão por colega e CI obrigatório na `main`. Mantenha a visibilidade do repositório conforme a decisão do grupo; a publicação pública desta entrega foi autorizada pelo usuário. `.env`, banco, fotos, cookies, logs e arquivos privados do HTTP Client não devem ser versionados.
 
 ## CI/CD e Cloud
 

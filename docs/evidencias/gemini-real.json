@@ -1,0 +1,94 @@
+{
+  "recorded_client_date": "2026-11-16",
+  "repository": "AndreKenji1/Global-Solution-HydroGuard",
+  "workflow_path": ".github/workflows/validate-gemini.yml",
+  "run": {
+    "id": 43973795166,
+    "html_url": "https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43973795166",
+    "head_sha": "32a8b46b74224e42dedf5e9ca3808f7cd4f94e5e",
+    "job_id": 133672467698,
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "backend_test_environment": {
+    "profile": "local",
+    "database": "temporary H2",
+    "model": "gemini-flash-lite-latest",
+    "timeout_seconds": 20,
+    "catalog_http_status": 200
+  },
+  "result": {
+    "result": "PASS",
+    "realGeminiConfirmed": true,
+    "tipoAnalise": "IA_GEMINI",
+    "prioridade": "ALTA",
+    "categoriaCharacters": 18,
+    "justificativaCharacters": 104,
+    "checks": [
+      "health",
+      "CSRF",
+      "cadastro 201",
+      "IA_GEMINI",
+      "schema",
+      "consulta 200",
+      "persistência",
+      "privacidade"
+    ],
+    "checkedAtUtc": "2026-11-16T22:51:08.690688+00:00"
+  },
+  "previous_attempts": [
+    {
+      "model": "gemini-2.5-flash",
+      "result": "FAIL",
+      "providerHttpStatus": 404,
+      "diagnostic_run_id": 43972491141
+    },
+    {
+      "model": "gemini-flash-latest",
+      "result": "FAIL",
+      "backendFailureClass": "HttpTimeoutException",
+      "timeout_seconds": 20
+    }
+  ],
+  "related_ci": {
+    "run_id": 43973200786,
+    "html_url": "https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43973200786",
+    "head_sha": "32a8b46b74224e42dedf5e9ca3808f7cd4f94e5e",
+    "conclusion": "success",
+    "java_tests": 104,
+    "python_tests": 6
+  },
+  "scope": {
+    "confirmed": [
+      "chamada Google Gemini pelo backend",
+      "classificação estruturada validada",
+      "consulta da mesma classificação persistida",
+      "ausência de campos privados na consulta pública"
+    ],
+    "not_confirmed": [
+      "implantação no Azure",
+      "Azure Blob real",
+      "execução do CD e aprovação production",
+      "configuração automática da chave no Compose ou produção"
+    ]
+  },
+  "privacy": "Somente metadados sanitizados. Sem chave, cookie, token de upload, protocolo, corpo de resposta ou texto completo da classificação. O alias latest pode evoluir e deve ser revalidado após mudanças.",
+  "artifact": {
+    "id": 14278943980,
+    "name": "gemini-real-result-43973795166",
+    "html_url": "https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43973795166/artifacts/14278943980"
+  },
+  "final_local_verification": {
+    "command": "mvn -Ppostgres-it clean verify",
+    "surefire_tests": 102,
+    "failsafe_tests": 2,
+    "java_tests_total": 104,
+    "python_verifier_tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "result": "PASS",
+    "model_default": "gemini-flash-lite-latest",
+    "timeout_seconds_default": 20
+  }
+}

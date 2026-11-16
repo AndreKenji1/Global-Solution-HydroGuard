@@ -23,7 +23,7 @@ Problemas identificados incluíam token administrativo padrão no código/config
 | Dashboard | Agregações SQL do banco, sem depender do tamanho da página ou de dados simulados. |
 | Fotografias | Autorização prévia, token individual de uso único por 30 minutos, hash no banco, limites de tamanho/resolução, decodificação e reencodificação JPEG/PNG. Fotos não são públicas; metadados e conteúdo anexado são removidos. |
 | Armazenamento | Adaptador local com proteção de caminhos/permissões e adaptador Azure Blob privado com Managed Identity ou configuração externa. Limpeza de objetos acompanha commit/rollback. |
-| Gemini | Chamada real implementada, schema JSON, validação estrita de campos/tipos/enum/tamanho, timeout de 8 segundos e até quatro chamadas concorrentes. Texto separado das instruções; fotografias não são enviadas. Falhas usam `REGRAS_CONTINGENCIA`; ausência de chave usa `REGRAS`. |
+| Gemini | Chamada real validada pelo backend com `gemini-flash-lite-latest`, schema JSON, validação estrita de campos/tipos/enum/tamanho, timeout de 20 segundos e até quatro chamadas concorrentes. Texto separado das instruções; fotografias não são enviadas. Falhas usam `REGRAS_CONTINGENCIA`; ausência de chave usa `REGRAS`. |
 | Interface | Dashboard, prévia da foto, cadastro, acompanhamento, histórico, login/logout, filtros/paginação, indicadores da origem da classificação, feedback e acessibilidade. Identidade visual preservada, sem migração de framework. |
 | Segurança | CSRF em mutações, rotação do id de sessão no login, invalidação no logout, cookie HttpOnly/SameSite=Strict, CSP e demais cabeçalhos, erros sem detalhes internos, limite local de tentativas de login e nenhuma credencial administrativa padrão. |
 | Banco | Migrações Flyway V1/V2 e Hibernate `validate`; sessões compartilhadas no JDBC. Sem limpeza ou migração destrutiva de dados existentes. |
@@ -31,7 +31,7 @@ Problemas identificados incluíam token administrativo padrão no código/config
 
 ## Build e testes automatizados
 
-Executado o equivalente a `mvn -Ppostgres-it clean verify`, com Maven 3.9.11 e JDK 17.0.20.1. Opções locais de cache, proxy e truststore foram necessárias apenas ao ambiente de execução e não contêm segredos na entrega.
+Na primeira entrega, foi executado o equivalente a `mvn -Ppostgres-it clean verify`, com Maven 3.9.11 e JDK 17.0.20.1. A tabela abaixo preserva o resultado histórico de 102 testes no commit `142e5fe`. Opções locais de cache, proxy e truststore foram necessárias apenas ao ambiente de execução e não contêm segredos na entrega.
 
 | Suíte | Testes | Falhas | Erros | Ignorados |
 |---|---:|---:|---:|---:|
@@ -39,9 +39,13 @@ Executado o equivalente a `mvn -Ppostgres-it clean verify`, com Maven 3.9.11 e J
 | Failsafe contra PostgreSQL 16 real | 2 | 0 | 0 | 0 |
 | **Total** | **102** | **0** | **0** | **0** |
 
+Após acrescentar dois casos Java que verificam diagnóstico HTTP seguro da Gemini, o [CI run 43973200786](https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43973200786), commit `32a8b46b74224e42dedf5e9ca3808f7cd4f94e5e`, aprovou **104 testes Java** (102 unitários/API e dois PostgreSQL) e **seis testes Python** do verificador, sem depender de chave real. A validação externa descrita adiante é uma execução separada com a chave protegida no GitHub.
+
+A verificação local final, após ajustar os padrões para `gemini-flash-lite-latest` e 20 segundos, também terminou com **BUILD SUCCESS**: 102 testes Surefire + dois Failsafe = **104 testes Java**, além dos **seis testes Python**, todos sem falhas, erros ou testes ignorados. O histórico inicial de 102 testes permanece acima para rastreabilidade.
+
 A suíte inclui entradas inválidas, normalização, HTTP/JSON, filtros/paginação, agregações, ausência de dados privados nas consultas, perfis/CSRF, login/rotação/logout, upload válido/forjado/vazio/excessivo, uso único/expiração, limites de resolução/metadados, armazenamento local/Blob mockado, concorrência/rollback e regras de triagem. Os testes Gemini cobrem sucesso, payload/schema, JSON inválido ou incompleto, campos extras/tipos/enum/tamanhos inválidos, bloqueio/truncamento, HTTP 401/403/429/500/503, timeout, interrupção e limite de concorrência. Não exigem chave real.
 
-JaCoCo registrou **93,0% de linhas** e **71,7% de ramos** cobertos no backend instrumentado. Cobertura não substitui testes externos nem comprova ausência de falhas.
+Na medição histórica da primeira entrega, JaCoCo registrou **93,0% de linhas** e **71,7% de ramos** cobertos no backend instrumentado. Cobertura não substitui testes externos nem comprova ausência de falhas.
 
 A primeira execução da suíte ampliada teve uma expectativa de teste divergente: protocolo malformado esperava 404, enquanto o contrato corretamente retornava 400. A expectativa foi ajustada, preservando 404 para protocolo válido inexistente. A revisão posterior identificou e corrigiu o caso real de caracteres NUL que o PostgreSQL rejeita e a omissão de histórico no detalhe administrativo.
 
@@ -54,6 +58,16 @@ Playwright/Chromium executou os fluxos reais em **1440×1000** e **390×844**: c
 A persistência foi conferida diretamente por SQL. A aplicação e o contêiner PostgreSQL foram reiniciados sem apagar volumes. **Protocolo, status, histórico, fotografia e sessão administrativa JDBC continuaram disponíveis após os reinícios.**
 
 O utilitário `tools/GerarSenha.java` foi executado em terminal interativo: leitura sem eco, confirmação e geração BCrypt; execução sem terminal é recusada. A senha de validação era efêmera, permaneceu fora do projeto e não integra o pacote.
+
+## Validação Gemini real — 16/11/2026
+
+O [workflow manual run 43973795166](https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43973795166), commit `32a8b46b74224e42dedf5e9ca3808f7cd4f94e5e`, job `133672467698`, concluiu com **success**. O segredo `GEMINI_API_KEY` ficou no ambiente do backend, sem ser recuperado ou exposto em texto pelo assistente. Um relato sintético foi enviado pela API do HydroGuard e a consulta posterior recuperou a mesma classificação persistida.
+
+Resultado sanitizado: **PASS**, `realGeminiConfirmed=true`, `tipoAnalise=IA_GEMINI`, prioridade `ALTA`, categoria com 18 caracteres e justificativa com 104 caracteres. Foram aprovados health, CSRF, cadastro HTTP 201, schema, consulta HTTP 200, persistência e exclusão de campos privados no acompanhamento. A evidência está em [evidencias/gemini-real.json](evidencias/gemini-real.json), com referência ao [artefato sanitizado](https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43973795166/artifacts/14278943980); ela não inclui chave, cookie, protocolo nem os textos completos da classificação.
+
+O modelo confirmado foi **`gemini-flash-lite-latest`**, com timeout de **20 segundos**, depois de consulta de catálogo HTTP 200. Antes disso, `gemini-2.5-flash` retornou HTTP 404 e `gemini-flash-latest` excedeu o timeout de 20 segundos. As falhas acionaram `REGRAS_CONTINGENCIA` e foram reprovadas pelo verificador de integração real; não foram apresentadas como respostas da IA.
+
+Esse teste ocorreu com H2 temporário no perfil `local`; PostgreSQL real foi exercitado separadamente nos testes de integração do CI. O alias `latest` pode mudar no fornecedor, portanto disponibilidade e contrato devem ser novamente verificados após mudanças de modelo. O segredo do GitHub habilita esse workflow; a aplicação local, o Compose e o Azure precisam receber sua própria configuração de ambiente para usar Gemini. Sem chave, o fallback `REGRAS` continua disponível e identificado. Nenhuma fotografia foi analisada ou enviada ao Google.
 
 ## Docker e DevOps
 
@@ -71,9 +85,8 @@ A promoção pelo CD e os recursos Azure ainda não foram executados/validados n
 
 ## Pendências e limites efetivos
 
-- **Gemini real (opcional):** nenhuma `GEMINI_API_KEY` estava configurada. O sistema funciona sem ela com classificação explícita `REGRAS`, já validada. Apenas a ativação e a validação da API real do Google exigem uma chave válida e modelo disponível na conta; mocks e fallback não equivalem a uma chamada real.
 - **Azure real:** não houve deploy, criação de recursos ou teste com conta Blob real. Container Apps, PostgreSQL gerenciado, Blob privado, Key Vault, monitoramento, backups, alta disponibilidade e escala estão documentados; o adaptador Blob foi testado por mocks.
-- **CD e configurações administrativas:** cadastrar variáveis/segredos/OIDC e configurar revisores, permissões do environment e proteção de branch antes de executar o CD. O CI já foi executado com sucesso. A publicação no repositório público foi expressamente autorizada pelo usuário.
+- **CD e configurações administrativas:** cadastrar variáveis/segredos/OIDC e configurar revisores, permissões do environment e proteção de branch antes de executar o CD. O CI e a validação Gemini real já foram executados com sucesso. A publicação no repositório público foi expressamente autorizada pelo usuário.
 - **Operação com cidadãos reais:** definir controlador/base legal, retenção e direitos de titulares, moderação de conteúdo e medidas contra abuso distribuído. Texto livre ou a justificativa da IA ainda podem conter informações fornecidas indevidamente pelo usuário; remoção de EXIF não anonimiza o conteúdo visual de uma imagem.
 - **Instalações anteriores:** a entrega inicia schemas novos; um banco legado com dados exige backup e migração explícita validada em cópia. Não houve banco legado com dados fornecido no ZIP.
 

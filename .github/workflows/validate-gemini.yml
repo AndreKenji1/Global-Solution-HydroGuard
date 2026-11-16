@@ -6,7 +6,7 @@ on:
       model:
         description: Modelo disponível para a chave Gemini da conta
         required: true
-        default: gemini-2.5-flash
+        default: gemini-flash-lite-latest
         type: string
 
 permissions:

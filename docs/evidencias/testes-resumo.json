@@ -1,7 +1,7 @@
 {
   "surefire": {
     "totals": {
-      "tests": 100,
+      "tests": 102,
       "failures": 0,
       "errors": 0,
       "skipped": 0
@@ -27,7 +27,7 @@
       },
       {
         "name": "br.com.hydroguard.service.GeminiIntegrationTest",
-        "tests": 36,
+        "tests": 38,
         "failures": 0,
         "errors": 0
       },
@@ -73,9 +73,15 @@
       }
     ]
   },
+  "python_verifier": {
+    "tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "external_api": false
+  },
   "coverage": {
     "INSTRUCTION": {
-      "covered": 2909,
+      "covered": 2915,
       "missed": 222
     },
     "BRANCH": {
@@ -83,7 +89,7 @@
       "missed": 69
     },
     "LINE": {
-      "covered": 466,
+      "covered": 468,
       "missed": 35
     },
     "COMPLEXITY": {

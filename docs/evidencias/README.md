@@ -4,4 +4,6 @@
 
 O repositório também inclui o resumo JSON dos testes locais e a inspeção sanitizada do contêiner Docker. As capturas em [../imagens/](../imagens/) usam dados sintéticos. Os logs locais de `ENOSPC` são histórico do ambiente `vfs` e não representam uma pendência atual do build Docker, comprovado no GitHub.
 
-Metadados de CI não comprovam deploy Azure, acesso Blob real, aprovação/execução do CD ou Gemini com chave real. Logs brutos com dados sensíveis, credenciais, cookies, bancos e fotografias operacionais não devem entrar no Git. Resultados, comandos e limites estão no [relatório](../relatorio-validacao.md).
+[gemini-real.json](gemini-real.json) registra a **validação Gemini real aprovada** no [run 43973795166](https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43973795166), commit `32a8b46`, em **16/11/2026**. O backend usou `gemini-flash-lite-latest` com timeout de 20 segundos e obteve `IA_GEMINI` persistida. Inclui apenas prioridade, tamanhos de texto, checks e metadados de execução, além das falhas anteriores de modelo404/timeout. O CI desse commit, [run 43973200786](https://github.com/AndreKenji1/Global-Solution-HydroGuard/actions/runs/43973200786), passou 104 testes Java e seis Python. A primeira evidência de 102 testes permanece como histórico.
+
+Esses resultados não comprovam deploy Azure, acesso Blob real ou aprovação/execução do CD. Logs brutos com dados sensíveis, credenciais, cookies, bancos e fotografias operacionais não devem entrar no Git. Resultados, comandos e limites estão no [relatório](../relatorio-validacao.md).

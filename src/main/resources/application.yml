@@ -67,5 +67,5 @@ hydroguard:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
   gemini:
     api-key: ${GEMINI_API_KEY:}
-    model: ${GEMINI_MODEL:gemini-2.5-flash}
-    timeout-seconds: ${GEMINI_TIMEOUT_SECONDS:8}
+    model: ${GEMINI_MODEL:gemini-flash-lite-latest}
+    timeout-seconds: ${GEMINI_TIMEOUT_SECONDS:20}

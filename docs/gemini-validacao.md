@@ -12,7 +12,7 @@ O workflow recebe o segredo diretamente do GitHub. Não é necessário revelar s
 
 ## Executar no GitHub
 
-Em **Actions → Validar Gemini real → Run workflow**, selecione `main` e o modelo disponível na conta, inicialmente `gemini-2.5-flash`. O workflow é manual; o CI comum continua usando mocks e não consome a API real.
+Em **Actions → Validar Gemini real → Run workflow**, selecione `main` e o modelo disponível na conta, inicialmente `gemini-flash-lite-latest`. O workflow é manual; o CI comum continua usando mocks e não consome a API real.
 
 Antes da compilação, uma consulta técnica ao catálogo Google confirma se o modelo escolhido está disponível para a chave e suporta geração de conteúdo. Somente nomes dos modelos e códigos HTTP são registrados. Se o modelo não existir, o workflow para antes de gerar conteúdo. Essa consulta ao catálogo não valida uma classificação real.
 

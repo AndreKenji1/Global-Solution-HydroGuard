@@ -44,9 +44,9 @@ public class TriagemService {
 
     @Autowired
     public TriagemService(@Value("${hydroguard.gemini.api-key:}") String apiKey,
-                         @Value("${hydroguard.gemini.model:gemini-2.5-flash}") String model,
+                         @Value("${hydroguard.gemini.model:gemini-flash-lite-latest}") String model,
                          ObjectMapper json,
-                         @Value("${hydroguard.gemini.timeout-seconds:8}") long timeoutSeconds,
+                         @Value("${hydroguard.gemini.timeout-seconds:20}") long timeoutSeconds,
                          @Value("${hydroguard.gemini.max-concurrent:4}") int maxConcurrent) {
         this(apiKey, model, json, HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(4)).build(),
             Duration.ofSeconds(timeoutSeconds), maxConcurrent);
@@ -54,7 +54,7 @@ public class TriagemService {
 
     // Preserva a construção do serviço pelas ferramentas e testes já existentes.
     public TriagemService(String apiKey, String model, ObjectMapper json) {
-        this(apiKey, model, json, 8, 4);
+        this(apiKey, model, json, 20, 4);
     }
 
     TriagemService(String apiKey, String model, ObjectMapper json, HttpClient client, Duration timeout) {
