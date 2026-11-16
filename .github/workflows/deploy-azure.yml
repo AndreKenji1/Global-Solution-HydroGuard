@@ -1,0 +1,116 @@
+name: CD - Promover imagem CI para Azure (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      ci_run_id:
+        description: ID de uma execução CI aprovada de push na branch main
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: hydroguard-production
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      sha: ${{ steps.ci.outputs.sha }}
+    steps:
+      - name: Validar origem e aprovação da compilação
+        id: ci
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+        run: |
+          set -euo pipefail
+          [[ "$CI_RUN_ID" =~ ^[0-9]+$ ]] || { echo "ci_run_id inválido"; exit 1; }
+          gh api "repos/$REPOSITORY/actions/runs/$CI_RUN_ID" > run.json
+          jq -e '.status == "completed" and .conclusion == "success" and .event == "push" and .head_branch == "main" and .path == ".github/workflows/ci.yml"' run.json > /dev/null
+          sha=$(jq -r '.head_sha' run.json)
+          [[ "$sha" =~ ^[a-f0-9]{40}$ ]] || exit 1
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+      - name: Exigir proteção manual do environment production
+        env:
+          GH_TOKEN: ${{ secrets.ENVIRONMENT_READ_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          : "${GH_TOKEN:?Configure o repository secret ENVIRONMENT_READ_TOKEN com Administration:read}"
+          # Falha fechada caso o environment ainda não tenha aprovadores.
+          gh api "repos/$REPOSITORY/environments/production" > environment.json
+          jq -e '.protection_rules | any(.type == "required_reviewers" and (.reviewers | length) > 0 and .prevent_self_review == true)' environment.json > /dev/null
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Configure required reviewers + prevent self-review nas configurações GitHub.
+    environment: production
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    steps:
+      - name: Obter exatamente a imagem produzida pelo CI
+        uses: actions/download-artifact@v4
+        with:
+          name: hydroguard-image-${{ needs.validate.outputs.sha }}
+          run-id: ${{ inputs.ci_run_id }}
+          github-token: ${{ github.token }}
+      - name: Autenticar na Azure por OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Carregar e publicar imagem no ACR
+        id: image
+        env:
+          SHA: ${{ needs.validate.outputs.sha }}
+          ACR_NAME: ${{ vars.AZURE_ACR_NAME }}
+          ACR_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
+        run: |
+          set -euo pipefail
+          : "${ACR_NAME:?Configure AZURE_ACR_NAME}"
+          : "${ACR_SERVER:?Configure ACR_LOGIN_SERVER}"
+          az acr login --name "$ACR_NAME"
+          gzip -dc hydroguard-image.tar.gz | docker load
+          image="$ACR_SERVER/hydroguard-citizen:$SHA"
+          docker tag "hydroguard-citizen:$SHA" "$image"
+          docker push "$image"
+          digest=$(az acr repository show --name "$ACR_NAME" --image "hydroguard-citizen:$SHA" --query digest --output tsv)
+          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || exit 1
+          echo "reference=$ACR_SERVER/hydroguard-citizen@$digest" >> "$GITHUB_OUTPUT"
+      - name: Publicar revisão e verificar disponibilidade
+        env:
+          IMAGE: ${{ steps.image.outputs.reference }}
+          APP_NAME: ${{ vars.AZURE_CONTAINER_APP }}
+          RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+        run: |
+          set -euo pipefail
+          : "${APP_NAME:?Configure AZURE_CONTAINER_APP}"
+          : "${RESOURCE_GROUP:?Configure AZURE_RESOURCE_GROUP}"
+          mode=$(az containerapp show --name "$APP_NAME" --resource-group "$RESOURCE_GROUP" --query properties.configuration.activeRevisionsMode --output tsv)
+          [[ "$mode" == "Single" ]] || { echo "Configure o Container App em modo de revisão Single antes de usar este workflow."; exit 1; }
+          az containerapp update --name "$APP_NAME" --resource-group "$RESOURCE_GROUP" --image "$IMAGE" --output none
+          ready=false
+          for attempt in $(seq 1 30); do
+            az containerapp show --name "$APP_NAME" --resource-group "$RESOURCE_GROUP" --query '{latest:properties.latestRevisionName, ready:properties.latestReadyRevisionName, state:properties.provisioningState}' --output json > revision.json
+            if jq -e '.latest != null and .latest == .ready and .state == "Succeeded"' revision.json > /dev/null; then
+              ready=true
+              break
+            fi
+            sleep 5
+          done
+          [[ "$ready" == true ]] || { echo "A nova revisão não ficou pronta no prazo esperado."; exit 1; }
+          fqdn=$(az containerapp show --name "$APP_NAME" --resource-group "$RESOURCE_GROUP" --query properties.configuration.ingress.fqdn --output tsv)
+          [[ "$fqdn" =~ ^[a-zA-Z0-9.-]+$ ]] || exit 1
+          curl --fail --silent --show-error --retry 20 --retry-delay 5 --retry-all-errors "https://$fqdn/actuator/health" | jq -e '.status == "UP"'

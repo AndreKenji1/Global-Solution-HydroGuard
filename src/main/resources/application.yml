@@ -1,0 +1,71 @@
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+  servlet:
+    session:
+      timeout: 20m
+      cookie:
+        http-only: true
+        same-site: strict
+        secure: ${COOKIE_SECURE:false}
+spring:
+  application:
+    name: hydroguard-citizen
+  datasource:
+    url: ${JDBC_URL:jdbc:postgresql://localhost:5432/hydroguard}
+    username: ${DB_USERNAME:hydroguard}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+  session:
+    jdbc:
+      initialize-schema: never
+  servlet:
+    multipart:
+      max-file-size: 4MB
+      max-request-size: 5MB
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+hydroguard:
+  admin:
+    username: ${ADMIN_USERNAME:admin}
+    password-hash: ${ADMIN_PASSWORD_HASH:}
+  analyst:
+    username: ${ANALYST_USERNAME:analista}
+    password-hash: ${ANALYST_PASSWORD_HASH:}
+  upload-dir: ${UPLOAD_DIR:./uploads}
+  storage:
+    type: ${STORAGE_PROVIDER:local}
+    azure:
+      endpoint: ${AZURE_STORAGE_BLOB_ENDPOINT:}
+      container: ${AZURE_STORAGE_CONTAINER:hydroguard-fotos}
+      connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-2.5-flash}
+    timeout-seconds: ${GEMINI_TIMEOUT_SECONDS:8}

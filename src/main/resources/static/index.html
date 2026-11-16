@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071c2c">
+  <meta name="description" content="HydroGuard Citizen: registre vazamentos e acompanhe ocorrências.">
+  <title>HydroGuard Citizen • Portal de Ocorrências</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%23087e78%22%2F%3E%3Cpath%20d%3D%22M16%204C12%2010%207%2016%207%2021a9%209%200%200%200%2018%200c0-5-5-11-9-17Z%22%20fill%3D%22%23b5fff4%22%2F%3E%3C%2Fsvg%3E">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Ir para o conteúdo</a>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="#inicio" class="brand" aria-label="HydroGuard Citizen, início">
+        <span class="brand-icon">
+          <svg viewBox="0 0 32 32" width="27" height="27" aria-hidden="true"><path d="M16 2C10 10 6 15 6 21a10 10 0 0 0 20 0C26 15 22 10 16 2Z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M11 21c0 3 2 5 5 5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </span>
+        <span>HydroGuard<span class="brand-sub">CITIZEN</span></span>
+      </a>
+      <div class="side-label">PLATAFORMA</div>
+      <nav aria-label="Navegação principal" class="nav">
+        <button class="nav-item active" data-page="inicio"><span class="nav-symbol" aria-hidden="true">◫</span>Visão geral</button>
+        <button class="nav-item" data-page="nova"><span class="nav-symbol" aria-hidden="true">⊕</span>Nova ocorrência</button>
+        <button class="nav-item" data-page="ocorrencias"><span class="nav-symbol" aria-hidden="true">≡</span>Acompanhar</button>
+        <button class="nav-item" data-page="gestao"><span class="nav-symbol" aria-hidden="true">▤</span>Gestão</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="side-illustration"><div class="pulse-circle">💧</div></div>
+        <div class="side-tip"><strong>Cada gota importa.</strong><br>Ajude a identificar desperdícios na sua cidade.</div>
+        <div class="online"><span class="online-dot"></span><span id="api-health">Conectando ao servidor...</span></div>
+      </div>
+    </aside>
+    <main class="main" id="main-content" tabindex="-1">
+      <header class="topbar">
+        <div class="breadcrumbs">PLATAFORMA <span>/</span> <span id="page-crumb">Visão geral</span></div>
+        <div class="top-right"><span class="live-dot"></span> CitizenTech · FIAP 2026 <span class="avatar">HC</span></div>
+      </header>
+      <section id="page-inicio" class="page visible">
+        <div class="hero">
+          <div class="hero-copy">
+            <span class="hero-eyebrow">CIDADANIA + TECNOLOGIA</span>
+            <h1>Cuidar da água<br>é cuidar do <em>futuro.</em></h1>
+            <p>Registre vazamentos, acompanhe solicitações e ajude a construir uma cidade mais sustentável.</p>
+            <button class="btn btn-light" data-go="nova">+ Registrar vazamento <span>↗</span></button>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <svg viewBox="0 0 310 300" width="100%" height="100%"><defs><linearGradient id="dg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#b5fff4"/><stop offset="1" stop-color="#45d8ce"/></linearGradient></defs><circle cx="160" cy="150" r="135" fill="#ffffff" opacity=".055"/><circle cx="160" cy="150" r="105" fill="#ffffff" opacity=".08"/><path d="M159 36C115 98 90 130 90 176a70 70 0 0 0 140 0c0-46-26-78-71-140Z" fill="url(#dg)"/><path d="M114 181c0 25 16 43 39 46" fill="none" stroke="#ffffff" stroke-opacity=".8" stroke-width="10" stroke-linecap="round"/><circle cx="247" cy="61" r="10" fill="#8af6e0" opacity=".9"/><circle cx="59" cy="93" r="6" fill="#8af6e0" opacity=".7"/><circle cx="248" cy="234" r="5" fill="#8af6e0" opacity=".8"/></svg>
+          </div>
+        </div>
+        <div class="section-heading"><div><span class="eyebrow">PANORAMA</span><h2>Resumo de ocorrências</h2></div><button class="link-btn" data-go="ocorrencias">Consultar protocolo <span>↗</span></button></div>
+        <div class="stats">
+          <article class="stat"><div class="stat-top"><span>Total registradas</span><span class="stat-icon blue">▧</span></div><strong id="stat-total">—</strong><small>Registros na plataforma</small></article>
+          <article class="stat"><div class="stat-top"><span>Em aberto</span><span class="stat-icon orange">◷</span></div><strong id="stat-open">—</strong><small>Aguardando análise</small></article>
+          <article class="stat"><div class="stat-top"><span>Prioridade alta</span><span class="stat-icon red">!</span></div><strong id="stat-high">—</strong><small>Ocorrências ainda não resolvidas</small></article>
+          <article class="stat"><div class="stat-top"><span>Resolvidas</span><span class="stat-icon green">✓</span></div><strong id="stat-done">—</strong><small>Status informado pela gestão</small></article>
+        </div>
+        <div class="section-heading"><div><span class="eyebrow">ATUALIZAÇÕES</span><h2>Seus protocolos nesta aba</h2></div></div>
+        <div class="surface"><div id="recent-list" class="records"><div class="loading-state">Nenhum protocolo nesta aba. Registre um vazamento ou consulte um protocolo.</div></div></div>
+        <div class="notice"><span>ⓘ</span><p>O HydroGuard Citizen é um protótipo acadêmico. Os relatos não são encaminhados automaticamente ao serviço público de água. Para emergências, utilize os canais oficiais.</p></div>
+      </section>
+      <section id="page-nova" class="page">
+        <div class="page-title"><span class="eyebrow">PARTICIPAÇÃO CIDADÃ</span><h1>Registrar um vazamento</h1><p>Conte o que aconteceu. O sistema fará uma classificação preliminar para auxiliar na triagem.</p></div>
+        <div class="form-layout">
+          <form id="new-form" class="surface form-card">
+            <div class="form-heading"><span class="step">01</span><div><h3>Informações da ocorrência</h3><p>Preencha os dados da localização e do problema encontrado.</p></div></div>
+            <div class="form-field"><label for="endereco">Local do vazamento <span class="req">*</span></label><input id="endereco" name="endereco" minlength="5" maxlength="180" required placeholder="Ex.: Rua das Flores, 120"><small>Informe o endereço ou um ponto de referência público.</small></div>
+            <div class="form-field"><label for="bairro">Bairro (opcional)</label><input id="bairro" name="bairro" maxlength="90" placeholder="Ex.: Centro"></div>
+            <div class="form-field"><label for="descricao">Descrição do problema <span class="req">*</span></label><textarea id="descricao" name="descricao" minlength="12" maxlength="1000" required rows="5" placeholder="Ex.: Há um cano rompido na calçada e muita água jorrando há mais de uma hora."></textarea><small>Inclua o que está acontecendo, sem dados pessoais.</small></div>
+            <div class="form-field"><label for="foto">Fotografia (opcional)</label><label class="file-drop" for="foto"><span class="file-emoji">▧</span><strong id="file-name">Clique para anexar uma imagem</strong><small>JPEG ou PNG • até 4 MB • máximo 4096 px por lado e 12 MP</small></label><input type="file" id="foto" name="foto" accept="image/jpeg,image/png" class="photo-input" aria-describedby="photo-help"><small id="photo-help">A imagem será validada e seus metadados removidos. Fotos não são analisadas por IA.</small><div id="photo-preview-wrap" class="photo-preview" hidden><img id="photo-preview" alt="Pré-visualização da fotografia selecionada"><button class="btn btn-outline" id="remove-photo" type="button">Remover fotografia</button></div></div>
+            <p id="form-feedback" class="feedback" role="status" aria-live="polite" hidden></p><div class="form-actions"><span>Campos com * são obrigatórios.</span><button class="btn btn-primary" type="submit" id="submit-report">Enviar ocorrência <span>→</span></button></div>
+          </form>
+          <aside class="form-aside"><div class="aside-card"><div class="aside-icon">✦</div><h3>Triagem inteligente</h3><p>A plataforma analisa a descrição para sugerir uma prioridade: baixa, média ou alta.</p><div class="aside-rule"></div><p class="aside-small">Com chave Gemini, a classificação utiliza IA. Sem chave, regras locais assumem a triagem e isso é informado no registro.</p></div><div class="aside-card muted"><h3>Antes de enviar</h3><p>Não inclua nomes, telefones ou fotos que identifiquem pessoas. Registre somente ocorrências em locais públicos.</p></div></aside>
+        </div>
+      </section>
+      <section id="page-ocorrencias" class="page" aria-labelledby="tracking-title">
+        <div class="page-title"><span class="eyebrow">ACOMPANHAMENTO</span><h1 id="tracking-title">Consultar por protocolo</h1><p>Informe o protocolo completo para acompanhar o andamento. Os detalhes de localização e as fotografias ficam disponíveis à equipe autorizada.</p></div>
+        <form id="protocol-form" class="surface form-card protocol-form">
+          <div class="form-field"><label for="protocol">Protocolo da ocorrência</label><input id="protocol" name="protocol" required maxlength="36" spellcheck="false" autocomplete="off" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" aria-describedby="protocol-help"><small id="protocol-help">Copie o código recebido após o cadastro. Guarde-o para consultas futuras.</small></div>
+          <div class="protocol-actions"><button class="btn btn-primary" id="lookup-protocol" type="submit">Consultar ocorrência</button><button class="btn btn-outline" id="copy-protocol" type="button">Copiar protocolo</button></div>
+          <p id="lookup-feedback" class="feedback" role="status" aria-live="polite" hidden></p>
+        </form>
+        <div id="protocol-result" class="surface protocol-result" hidden></div>
+        <div class="section-heading"><div><span class="eyebrow">SESSÃO ATUAL</span><h2>Protocolos consultados nesta aba</h2></div><button class="link-btn" id="clear-history" type="button">Limpar histórico</button></div>
+        <p class="section-help">Os protocolos ficam apenas na memória desta aba. Recarregar ou fechar a página limpa este histórico.</p>
+        <div class="surface"><div id="all-list" class="records"></div></div>
+      </section>
+      <section id="page-gestao" class="page" aria-labelledby="admin-title">
+        <div class="page-title"><span class="eyebrow">ÁREA ADMINISTRATIVA</span><h1 id="admin-title">Gestão das ocorrências</h1><p>Acesso restrito à equipe autorizada para consultar relatos e acompanhar o atendimento.</p></div>
+        <form id="login-form" class="surface form-card login-card">
+          <h2>Acessar a gestão</h2>
+          <div class="form-field"><label for="admin-username">Usuário</label><input id="admin-username" name="username" required maxlength="100" autocomplete="username"></div>
+          <div class="form-field"><label for="admin-password">Senha</label><input id="admin-password" name="password" type="password" required maxlength="200" autocomplete="current-password"></div>
+          <button id="login-button" class="btn btn-primary" type="submit">Entrar</button>
+          <p id="login-feedback" class="feedback" role="status" aria-live="polite" hidden></p>
+        </form>
+        <div id="admin-panel" hidden>
+          <div class="surface admin-session"><span id="session-label"></span><button class="btn btn-outline" id="logout-button" type="button">Sair</button></div>
+          <div class="section-heading"><div><span class="eyebrow">PAINEL</span><h2>Histórico de ocorrências</h2></div></div>
+          <div class="surface listing">
+            <form id="filter-form" class="list-toolbar">
+              <div class="search-field"><span aria-hidden="true">⌕</span><input id="search" type="search" maxlength="180" placeholder="Endereço, bairro ou protocolo" aria-label="Pesquisar ocorrências"></div>
+              <select id="filter-status" aria-label="Filtrar por status"><option value="">Todos os status</option><option value="ABERTA">Aberta</option><option value="EM_ANALISE">Em análise</option><option value="EM_ATENDIMENTO">Em atendimento</option><option value="RESOLVIDA">Resolvida</option></select>
+              <select id="filter-priority" aria-label="Filtrar por prioridade"><option value="">Todas as prioridades</option><option value="ALTA">Alta</option><option value="MEDIA">Média</option><option value="BAIXA">Baixa</option></select>
+              <button class="btn btn-primary" id="apply-filters" type="submit">Filtrar</button>
+              <button class="btn btn-outline" id="refresh" type="button" aria-label="Atualizar ocorrências">↻</button>
+            </form>
+            <p id="admin-feedback" class="feedback list-feedback" role="status" aria-live="polite" hidden></p>
+            <div id="admin-list" class="records"></div>
+            <nav class="pagination" aria-label="Paginação de ocorrências"><button class="btn btn-outline" id="previous-page" type="button">Anterior</button><span id="page-counter" aria-live="polite"></span><button class="btn btn-outline" id="next-page" type="button">Próxima</button></nav>
+          </div>
+        </div>
+      </section>
+      <footer class="footer"><span>© HydroGuard Citizen · Global Solution FIAP 2026</span><span>Protótipo educacional · CitizenTech</span></footer>
+    </main>
+  </div>
+  <dialog id="detail-dialog" class="detail-dialog" aria-labelledby="detail-title"><div class="modal-header"><div><span class="eyebrow">DETALHES DA OCORRÊNCIA</span><h2 id="detail-title">Registro</h2></div><button id="close-detail" class="close" aria-label="Fechar detalhes">×</button></div><div id="detail-body"></div></dialog>
+  <script src="/app.js" defer></script>
+</body>
+</html>

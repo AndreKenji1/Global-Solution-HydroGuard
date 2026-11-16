@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: ${JDBC_URL:jdbc:postgresql://localhost:5432/hydroguard_test}
+    username: ${DB_USERNAME:hydroguard}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+hydroguard:
+  gemini:
+    api-key: ""
+  storage:
+    type: local
+  upload-dir: ${java.io.tmpdir}/hydroguard-postgres-it-uploads

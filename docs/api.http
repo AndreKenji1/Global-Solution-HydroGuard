@@ -1,0 +1,86 @@
+# Exemplos para a extensão REST Client do VS Code (cookies habilitados).
+# Execute sequencialmente as requisições nomeadas.
+# adminUsername/adminPassword devem vir de variáveis LOCAIS/privadas do cliente,
+# nunca de credenciais salvas neste arquivo. Prefira o login pela interface.
+# No IntelliJ, configure variáveis em http-client.private.env.json (ignorado pelo Git)
+# e adapte as referências às respostas com o recurso de response handlers do IDE.
+@baseUrl = http://localhost:8080
+
+### Saúde
+GET {{baseUrl}}/actuator/health
+
+### Informações
+GET {{baseUrl}}/api/info
+
+### Dashboard agregado público
+GET {{baseUrl}}/api/dashboard
+
+### Obter sessão/CSRF antes das operações de escrita
+# @name csrf
+GET {{baseUrl}}/api/auth/csrf
+
+### Cadastro (retorna protocolo e tokenUpload somente nesta resposta)
+# @name criar
+POST {{baseUrl}}/api/ocorrencias
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrf.response.body.$.token}}
+
+{
+  "descricao": "Cano rompido com água jorrando na via pública",
+  "endereco": "Rua das Flores, 120",
+  "bairro": "Centro"
+}
+
+### Acompanhamento público: sem endereço exato, descrição original ou autor
+GET {{baseUrl}}/api/ocorrencias/protocolo/{{criar.response.body.$.protocolo}}
+
+### Foto opcional: crie docs/foto-local.png com imagem sintética antes de executar.
+# O token expira após 30 min e é consumido após um envio bem-sucedido.
+POST {{baseUrl}}/api/ocorrencias/{{criar.response.body.$.id}}/foto
+X-CSRF-TOKEN: {{csrf.response.body.$.token}}
+X-Upload-Token: {{criar.response.body.$.tokenUpload}}
+Content-Type: multipart/form-data; boundary=HydroGuardBoundary
+
+--HydroGuardBoundary
+Content-Disposition: form-data; name="foto"; filename="foto-local.png"
+Content-Type: image/png
+
+< ./foto-local.png
+--HydroGuardBoundary--
+
+### Login (variáveis privadas do cliente)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrf.response.body.$.token}}
+
+{"username":"{{adminUsername}}","password":"{{adminPassword}}"}
+
+### Login renova a proteção: obtenha novo token na mesma sessão
+# @name csrfAdmin
+GET {{baseUrl}}/api/auth/csrf
+
+### Identidade autenticada
+GET {{baseUrl}}/api/auth/me
+
+### Histórico/listagem administrativa com filtros combinados e paginação
+GET {{baseUrl}}/api/admin/ocorrencias?status=ABERTA&prioridade=ALTA&q=Centro&page=0&size=20
+
+### Detalhes administrativos com histórico e autor
+GET {{baseUrl}}/api/ocorrencias/{{criar.response.body.$.id}}
+
+### Leitura de foto: requer ADMIN ou ANALISTA
+GET {{baseUrl}}/api/ocorrencias/{{criar.response.body.$.id}}/foto
+
+### Atualizar status: somente ADMIN
+PATCH {{baseUrl}}/api/ocorrencias/{{criar.response.body.$.id}}/status
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfAdmin.response.body.$.token}}
+
+{"status":"EM_ANALISE"}
+
+### Encerrar sessão
+POST {{baseUrl}}/api/auth/logout
+X-CSRF-TOKEN: {{csrfAdmin.response.body.$.token}}
+
+### Sem sessão: listagem deve responder 401
+GET {{baseUrl}}/api/ocorrencias

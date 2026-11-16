@@ -1,0 +1,4 @@
+# PostgreSQL is the default; profile retained for existing run configurations.
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver

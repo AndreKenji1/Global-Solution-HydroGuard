@@ -1,0 +1,9 @@
+{
+  "name": "hydroguard-ui-smoke",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Verificação opcional da interface HydroGuard contra uma aplicação de teste em execução",
+  "scripts": {"test": "node smoke.cjs"},
+  "devDependencies": {"playwright": "1.62.1"},
+  "engines": {"node": ">=20"}
+}

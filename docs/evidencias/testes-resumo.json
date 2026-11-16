@@ -1,0 +1,102 @@
+{
+  "surefire": {
+    "totals": {
+      "tests": 100,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": [
+      {
+        "name": "br.com.hydroguard.storage.ImagemSanitizerTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "br.com.hydroguard.storage.LocalFotoStorageTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "br.com.hydroguard.OcorrenciaServiceTest",
+        "tests": 15,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "br.com.hydroguard.service.GeminiIntegrationTest",
+        "tests": 36,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "br.com.hydroguard.TriagemServiceTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "br.com.hydroguard.OcorrenciaApiTest",
+        "tests": 20,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "br.com.hydroguard.storage.AzureBlobFotoStorageTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "br.com.hydroguard.AuthApiTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0
+      }
+    ]
+  },
+  "failsafe": {
+    "totals": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": [
+      {
+        "name": "br.com.hydroguard.PostgresIT",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0
+      }
+    ]
+  },
+  "coverage": {
+    "INSTRUCTION": {
+      "covered": 2909,
+      "missed": 222
+    },
+    "BRANCH": {
+      "covered": 175,
+      "missed": 69
+    },
+    "LINE": {
+      "covered": 466,
+      "missed": 35
+    },
+    "COMPLEXITY": {
+      "covered": 221,
+      "missed": 78
+    },
+    "METHOD": {
+      "covered": 164,
+      "missed": 13
+    },
+    "CLASS": {
+      "covered": 31,
+      "missed": 0
+    }
+  }
+}
