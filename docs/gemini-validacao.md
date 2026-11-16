@@ -14,7 +14,9 @@ O workflow recebe o segredo diretamente do GitHub. Não é necessário revelar s
 
 Em **Actions → Validar Gemini real → Run workflow**, selecione `main` e o modelo disponível na conta, inicialmente `gemini-2.5-flash`. O workflow é manual; o CI comum continua usando mocks e não consome a API real.
 
-A compilação e os testes são executados sem a chave. Depois, somente o backend do teste recebe o segredo. A aplicação inicia em um diretório temporário com H2 explícito, sem alterar bancos existentes ou recursos Azure, e é encerrada ao concluir. O teste envia uma única descrição sintética, sem fotografias ou dados de pessoas.
+Antes da compilação, uma consulta técnica ao catálogo Google confirma se o modelo escolhido está disponível para a chave e suporta geração de conteúdo. Somente nomes dos modelos e códigos HTTP são registrados. Se o modelo não existir, o workflow para antes de gerar conteúdo. Essa consulta ao catálogo não valida uma classificação real.
+
+A compilação e os testes são executados sem a chave. Depois, o backend do teste recebe o segredo. A aplicação inicia em um diretório temporário com H2 explícito, sem alterar bancos existentes ou recursos Azure, e é encerrada ao concluir. O teste envia uma única descrição sintética, sem fotografias ou dados de pessoas.
 
 A aprovação exige saúde do backend, CSRF válido, HTTP 201 no cadastro, `IA_GEMINI`, prioridade/categoria/justificativa válidas e consulta HTTP 200 com a mesma classificação persistida, sem campos privados. A categoria e a justificativa não precisam ter um texto predeterminado.
 

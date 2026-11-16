@@ -23,6 +23,15 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Conferir o modelo disponível sem expor a chave
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ inputs.model }}
+        run: |
+          umask 077
+          python tools/listar-modelos-gemini.py \
+            --model "$GEMINI_MODEL" \
+            --output "$RUNNER_TEMP/hydroguard-gemini/models.json"
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -84,6 +93,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gemini-real-result-${{ github.run_id }}
-          path: ${{ runner.temp }}/hydroguard-gemini/result.json
+          path: |
+            ${{ runner.temp }}/hydroguard-gemini/result.json
+            ${{ runner.temp }}/hydroguard-gemini/models.json
           if-no-files-found: warn
           retention-days: 7
