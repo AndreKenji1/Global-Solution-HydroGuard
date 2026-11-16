@@ -45,6 +45,8 @@ jobs:
           DB_USERNAME: hydroguard
           DB_PASSWORD: ci-${{ github.run_id }}-${{ github.run_attempt }}
         run: mvn --batch-mode --no-transfer-progress -Ppostgres-it clean verify
+      - name: Testar o verificador de integração Gemini sem serviços externos
+        run: python -m unittest discover -s tools -p 'test_validar_gemini_real.py' -v
       - name: Arquivar relatórios dos testes
         if: always()
         uses: actions/upload-artifact@v4

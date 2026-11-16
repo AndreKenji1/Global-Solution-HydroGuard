@@ -233,6 +233,8 @@ O backend valida conclusão completa, campos exatos, tipos textuais, enum e limi
 
 A classificação é uma sugestão, não um laudo ou confirmação de urgência. **Não há análise de fotografias**. Não envie dados pessoais à descrição. A execução com uma chave real só pode ser comprovada quando uma credencial válida estiver configurada; mocks verificam o contrato sem consumir a API.
 
+Para validar com uma chave guardada no GitHub, siga [o procedimento Gemini real](docs/gemini-validacao.md). O workflow manual inicia um backend isolado, envia um relato sintético e só aprova com `IA_GEMINI` persistida. O CI comum continua sem utilizar a chave real.
+
 ## Testes e colaboração Git
 
 ```bash
