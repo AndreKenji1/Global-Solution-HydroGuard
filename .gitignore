@@ -16,6 +16,9 @@
 Thumbs.db
 /http-client.private.env.json
 /.http-client/
-__pycache__/
-*.py[cod]
-/docs/foto-local.png
+/backups/
+*.dump
+*.backup
+*.sql.gz
+.pgpass
+.azure/
