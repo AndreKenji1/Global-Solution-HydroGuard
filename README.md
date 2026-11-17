@@ -6,6 +6,22 @@ Aplicação acadêmica para registrar vazamentos em espaços públicos, receber 
 
 A proposta apoia a participação cidadã na identificação de perdas de água e problemas urbanos, em linha com os ODS 6 e 11. Economia de água e tempo de reparo são impactos esperados que precisam ser medidos em uma implantação real. A aplicação não encaminha relatos automaticamente a concessionárias nem despacha equipes; emergências devem ser comunicadas pelos canais oficiais.
 
+## Prévia da interface
+
+### Painel administrativo
+
+Gestão das ocorrências com filtros, indicadores de prioridade e atualização de status.
+
+![Painel administrativo do HydroGuard Citizen](assets/screenshots/painel-administrativo.png)
+
+### Consulta pelo celular
+
+Acompanhamento por protocolo em uma interface adaptada para telas menores.
+
+<img src="assets/screenshots/consulta-mobile.png" alt="Consulta de ocorrência pelo celular no HydroGuard Citizen" width="320">
+
+As capturas usam dados fictícios de demonstração.
+
 ## Tecnologias e arquitetura
 
 Java 17, Maven 3.9+, Spring Boot 3.5.16, MVC, Bean Validation, JPA, Spring Security, Spring Session JDBC, Flyway e PostgreSQL 16. O frontend HTML/CSS/JavaScript, com identidade visual azul HydroGuard, é servido pelo backend. H2 fica restrito aos testes e ao perfil explícito de demonstração `local`.
